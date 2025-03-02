@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group = 'nl.nielsvanbruggen'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.apis:google-api-services-sheets:v4-rev20250211-2.0.0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.36'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'ch.qos.logback:logback-classic:1.2.11'
+}
+
+test {
+    useJUnitPlatform()
+}
