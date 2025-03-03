@@ -5,19 +5,22 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
+import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
+import nl.nielsvanbruggen.gsorm.credentials.CredentialsFactory;
 import nl.nielsvanbruggen.gsorm.deserializers.Deserializer;
 import nl.nielsvanbruggen.gsorm.deserializers.TableDeserializer;
 import nl.nielsvanbruggen.gsorm.resolvers.chains.ResolverChain;
 import nl.nielsvanbruggen.gsorm.resolvers.chains.ResolverChainFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class GoogleSheet<T> {
+    private static final String DEFAULT_RANGE = "A:Z";
+    private static final String DEFAULT_APPLICATION_NAME = "Default Google Sheet App";
+
     private final Class<T> clazz;
     private final Deserializer deserializer;
     private final Sheets sheets;
@@ -36,72 +39,74 @@ public class GoogleSheet<T> {
         List<List<Object>> rows = sheets.spreadsheets()
                 .values()
                 .get(spreadsheetId, range)
-//                .get("1wAyGptuZSE98XLlxGiCVuk0rqkZ5RhoO0wDS0z59SG4", "A:Z")
                 .execute()
                 .getValues();
 
         return deserializer.map(rows, clazz);
     }
 
-    // TODO: Properly implement this.
-    private static GoogleCredentials getGoogleCredentials() {
-        try (InputStream credentials = GoogleSheet.class.getResourceAsStream("/credentials.json")) {
-            if(credentials == null) return null;
 
-            return GoogleCredentials.fromStream(credentials);
-        } catch (IOException e) {
-            return null;
-        }
-    }
 
     public static class Builder<T> {
         private final Class<T> clazz;
+        private final String spreadsheetId;
 
+        private Credentials credentials;
         private Deserializer deserializer;
         private Sheets sheets;
-        private String spreadsheetId;
-        private String range = "A:Z";
-        private String applicationName = "Default Google Sheet App";
+        private String range = DEFAULT_RANGE;
+        private String applicationName = DEFAULT_APPLICATION_NAME;
 
-        public Builder(Class<T> clazz) {
+        public Builder(Class<T> clazz, String spreadsheetId) {
             this.clazz = clazz;
+            this.spreadsheetId = spreadsheetId;
         }
 
-        public Builder<T> deserializer(Deserializer deserializer) {
+        public Builder<T> setDeserializer(Deserializer deserializer) {
             this.deserializer = deserializer;
             return this;
         }
 
-        public Builder<T> sheets(Sheets sheets) {
+        public Builder<T> setSheets(Sheets sheets) {
             this.sheets = sheets;
             return this;
         }
 
-        public Builder<T> range(String range) {
+        public Builder<T> setRange(String range) {
             this.range = range;
             return this;
         }
 
-        public Builder<T> applicationName(String applicationName) {
+        public Builder<T> setApplicationName(String applicationName) {
             this.applicationName = applicationName;
             return this;
         }
 
-        public GoogleSheet<T> build(String spreadsheetId) throws GeneralSecurityException, IOException {
+        public Builder<T> setCredentials(Credentials credentials) {
+            this.credentials = credentials;
+            return this;
+        }
+
+        public GoogleSheet<T> build() throws GeneralSecurityException, IOException {
             NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
-            this.spreadsheetId = spreadsheetId;
-
             // Default deserializer
             if(this.deserializer == null) {
-                ResolverChain resolverChain = ResolverChainFactory.getSimpleResolverChain();
+                ResolverChain resolverChain = ResolverChainFactory.getBasicResolverChain();
                 this.deserializer = new TableDeserializer(resolverChain);
+            }
+
+            // Default credentials.
+            if(this.credentials == null) {
+                // TODO: Add logic for automatic trying of different credential providers.
+                Credentials credentials = CredentialsFactory.getGoogleCredentials();
+                this.credentials = credentials;
             }
 
             // Default Sheets
             if(this.sheets == null) {
-                this.sheets = new Sheets.Builder(transport, jsonFactory, new HttpCredentialsAdapter(getGoogleCredentials()))
+                this.sheets = new Sheets.Builder(transport, jsonFactory, new HttpCredentialsAdapter(credentials))
                         .setApplicationName(applicationName)
                         .build();
             }

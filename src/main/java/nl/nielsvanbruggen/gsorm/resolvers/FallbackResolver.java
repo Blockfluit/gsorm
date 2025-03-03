@@ -8,6 +8,6 @@ public class FallbackResolver implements TypeResolver<Object> {
 
     @Override
     public Object resolve(String value) {
-        return value;
+        return null;
     }
 }

@@ -5,14 +5,14 @@ import nl.nielsvanbruggen.gsorm.resolvers.TypeResolver;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleResolverChain implements ResolverChain {
+public class BasicResolverChain implements ResolverChain {
     private final List<TypeResolver<?>> typeResolvers;
 
-    public SimpleResolverChain() {
+    public BasicResolverChain() {
         this.typeResolvers = new ArrayList<>();
     }
 
-    public SimpleResolverChain(List<TypeResolver<?>> typeResolvers) {
+    public BasicResolverChain(List<TypeResolver<?>> typeResolvers) {
         this.typeResolvers = new ArrayList<>(typeResolvers);
     }
 
@@ -27,7 +27,18 @@ public class SimpleResolverChain implements ResolverChain {
         throw new IllegalStateException("No compatible TypeResolver found!");
     }
 
-    public void insertBefore() {
+    @Override
+    public void insertBefore(TypeResolver<?> typeResolver, Class<?> clazz) {
+
+    }
+
+    @Override
+    public void insertAfter(TypeResolver<?> typeResolver, Class<?> clazz) {
+
+    }
+
+    @Override
+    public void add(TypeResolver<?> typeResolver) {
 
     }
 }

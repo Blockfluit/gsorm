@@ -9,7 +9,7 @@ public class ResolverChainFactory {
 
     private ResolverChainFactory() {}
 
-    public static SimpleResolverChain getSimpleResolverChain() {
+    public static BasicResolverChain getBasicResolverChain() {
         List<TypeResolver<?>> resolvers = Arrays.asList(
                 new StringResolver(),
                 new IntegerResolver(),
@@ -20,6 +20,6 @@ public class ResolverChainFactory {
                 new FallbackResolver()
         );
 
-        return new SimpleResolverChain(resolvers);
+        return new BasicResolverChain(resolvers);
     }
 }
