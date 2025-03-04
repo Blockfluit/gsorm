@@ -10,8 +10,8 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import nl.nielsvanbruggen.gsorm.credentials.CredentialsFactory;
 import nl.nielsvanbruggen.gsorm.deserializers.Deserializer;
 import nl.nielsvanbruggen.gsorm.deserializers.TableDeserializer;
-import nl.nielsvanbruggen.gsorm.resolvers.chains.ResolverChain;
-import nl.nielsvanbruggen.gsorm.resolvers.chains.ResolverChainFactory;
+import nl.nielsvanbruggen.gsorm.resolvers.chains.TypeResolverChain;
+import nl.nielsvanbruggen.gsorm.resolvers.chains.TypeResolverChainFactory;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -45,9 +45,9 @@ public class GoogleSheet<T> {
         return deserializer.map(rows, clazz);
     }
 
-
-
     public static class Builder<T> {
+        private static final JsonFactory DEFAULT_JSON_FACTORY = GsonFactory.getDefaultInstance();
+
         private final Class<T> clazz;
         private final String spreadsheetId;
 
@@ -89,24 +89,21 @@ public class GoogleSheet<T> {
 
         public GoogleSheet<T> build() throws GeneralSecurityException, IOException {
             NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
             // Default deserializer
             if(this.deserializer == null) {
-                ResolverChain resolverChain = ResolverChainFactory.getBasicResolverChain();
-                this.deserializer = new TableDeserializer(resolverChain);
+                TypeResolverChain typeResolverChain = TypeResolverChainFactory.getBasicTypeResolverChain();
+                this.deserializer = new TableDeserializer(typeResolverChain);
             }
 
             // Default credentials.
             if(this.credentials == null) {
-                // TODO: Add logic for automatic trying of different credential providers.
-                Credentials credentials = CredentialsFactory.getGoogleCredentials();
-                this.credentials = credentials;
+                this.credentials = CredentialsFactory.getDefaultCredentials();
             }
 
             // Default Sheets
             if(this.sheets == null) {
-                this.sheets = new Sheets.Builder(transport, jsonFactory, new HttpCredentialsAdapter(credentials))
+                this.sheets = new Sheets.Builder(transport, DEFAULT_JSON_FACTORY, new HttpCredentialsAdapter(credentials))
                         .setApplicationName(applicationName)
                         .build();
             }

@@ -5,14 +5,14 @@ import nl.nielsvanbruggen.gsorm.resolvers.TypeResolver;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasicResolverChain implements ResolverChain {
+public class BasicTypeResolverChain implements TypeResolverChain {
     private final List<TypeResolver<?>> typeResolvers;
 
-    public BasicResolverChain() {
+    public BasicTypeResolverChain() {
         this.typeResolvers = new ArrayList<>();
     }
 
-    public BasicResolverChain(List<TypeResolver<?>> typeResolvers) {
+    public BasicTypeResolverChain(List<TypeResolver<?>> typeResolvers) {
         this.typeResolvers = new ArrayList<>(typeResolvers);
     }
 

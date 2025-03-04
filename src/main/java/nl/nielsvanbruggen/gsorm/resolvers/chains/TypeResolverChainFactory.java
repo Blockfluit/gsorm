@@ -5,11 +5,11 @@ import nl.nielsvanbruggen.gsorm.resolvers.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class ResolverChainFactory {
+public class TypeResolverChainFactory {
 
-    private ResolverChainFactory() {}
+    private TypeResolverChainFactory() {}
 
-    public static BasicResolverChain getBasicResolverChain() {
+    public static BasicTypeResolverChain getBasicTypeResolverChain() {
         List<TypeResolver<?>> resolvers = Arrays.asList(
                 new StringResolver(),
                 new IntegerResolver(),
@@ -20,6 +20,6 @@ public class ResolverChainFactory {
                 new FallbackResolver()
         );
 
-        return new BasicResolverChain(resolvers);
+        return new BasicTypeResolverChain(resolvers);
     }
 }

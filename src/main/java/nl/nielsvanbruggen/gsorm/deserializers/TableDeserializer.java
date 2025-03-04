@@ -1,8 +1,7 @@
 package nl.nielsvanbruggen.gsorm.deserializers;
 
 import nl.nielsvanbruggen.gsorm.annotations.SheetColumn;
-import nl.nielsvanbruggen.gsorm.resolvers.TypeResolver;
-import nl.nielsvanbruggen.gsorm.resolvers.chains.ResolverChain;
+import nl.nielsvanbruggen.gsorm.resolvers.chains.TypeResolverChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +12,10 @@ import java.util.stream.Collectors;
 public class TableDeserializer implements Deserializer {
     private final static Logger logger = LoggerFactory.getLogger(TableDeserializer.class);
 
-    private final ResolverChain resolverChain;
+    private final TypeResolverChain typeResolverChain;
 
-    public TableDeserializer(ResolverChain resolverChain) {
-        this.resolverChain = resolverChain;
+    public TableDeserializer(TypeResolverChain typeResolverChain) {
+        this.typeResolverChain = typeResolverChain;
     }
 
     public <T> List<T> map(List<List<Object>> table, Class<T> clazz) {
@@ -69,7 +68,7 @@ public class TableDeserializer implements Deserializer {
 
                         Field field = fieldMap.get(columnName);
                         if (field != null) {
-                            Object object = resolverChain.resolve(field.getType(), value);
+                            Object object = typeResolverChain.resolve(field.getType(), value);
 
                             try {
                                 field.set(row, object);
